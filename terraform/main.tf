@@ -1,24 +1,8 @@
 
 terraform {
-  required_providers {
-    azurerm = {
-      source  = "hashicorp/azurerm"
-      version = "~> 4.35.0"
-    }
-
-    confluent = {
-      source  = "confluentinc/confluent"
-      version = "2.32.0"
-    }
-  }
-
   required_version = ">= 1.11.4"
 }
 
-provider "azurerm" {
-  features {
-  }
-}
 
 provider "confluent" {
   kafka_id            = var.kafka_id                   # optionally use KAFKA_ID env var

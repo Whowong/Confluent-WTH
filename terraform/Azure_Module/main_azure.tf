@@ -1,12 +1,46 @@
+terraform {
+  required_providers {
+    azurerm = {
+      source  = "hashicorp/azurerm"
+      version = "~> 4.35.0"
+    }
+  }
+
+  required_version = ">= 1.11.4"
+}
+
+provider "azurerm" {
+  features {
+  }
+  subscription_id = "a8df2f8c-b201-497e-82cf-026956b63875"
+}
+
+variable "name_prefix" {
+  description = "Prefix for all resource names"
+  type        = string
+
+  validation {
+    condition     = length(var.name_prefix) <= 6 && can(regex("^[a-z0-9]+$", var.name_prefix))
+    error_message = "The name_prefix must be 6 characters or fewer and contain only lowercase letters (a-z) or numbers (0-9)."
+  }
+}
+
+variable "location" {
+  description = "Azure region"
+  type        = string
+  default     = "westus2"
+}
+
+
 # Resource Group
 resource "azurerm_resource_group" "main" {
-  name     = "${var.resource_group_name}"
-  location = "${var.resource_group_location}"
+  name     = "${var.name_prefix}-confluentwth-rg"
+  location = var.location
 }
 
 # Azure AI Search Instance
 resource "azurerm_search_service" "search" {
-  name                = "confluentizzysearch1"
+  name                = "${var.name_prefix}-confluentwth-search"
   resource_group_name = azurerm_resource_group.main.name
   location            = azurerm_resource_group.main.location
   sku                 = "standard"
@@ -18,7 +52,7 @@ resource "azurerm_search_service" "search" {
 
 # Azure Redis Cache
 # resource "azurerm_redis_cache" "redis" {
-#   name                = "confluentizzyredis1"
+#   name                = "${var.name_prefix}-confluentwth-redis"
 #   location            = azurerm_resource_group.main.location
 #   resource_group_name = azurerm_resource_group.main.name
 #   capacity            = 1    # C1 (1 GB)
@@ -31,7 +65,7 @@ resource "azurerm_search_service" "search" {
 
 # Azure Cosmos DB (SQL API)
 resource "azurerm_cosmosdb_account" "cosmosdb" {
-  name                = "confluentizzycosmos1"
+  name                = "${var.name_prefix}-confluentwth-cosmos"
   location            = azurerm_resource_group.main.location
   resource_group_name = azurerm_resource_group.main.name
   offer_type          = "Standard"
@@ -49,7 +83,7 @@ resource "azurerm_cosmosdb_account" "cosmosdb" {
 
 # Cosmos DB SQL Database
 resource "azurerm_cosmosdb_sql_database" "retailstore" {
-  name                = "retailstore"
+  name                = "${var.name_prefix}-confluentwth-retailstore"
   resource_group_name = azurerm_resource_group.main.name
   account_name        = azurerm_cosmosdb_account.cosmosdb.name
 
@@ -58,7 +92,7 @@ resource "azurerm_cosmosdb_sql_database" "retailstore" {
 
 # Purchases Container
 resource "azurerm_cosmosdb_sql_container" "purchases" {
-  name                = "purchases"
+  name                = "${var.name_prefix}-confluentwth-purchases"
   resource_group_name = azurerm_resource_group.main.name
   account_name        = azurerm_cosmosdb_account.cosmosdb.name
   database_name       = azurerm_cosmosdb_sql_database.retailstore.name
@@ -69,7 +103,7 @@ resource "azurerm_cosmosdb_sql_container" "purchases" {
 
 # Returns Container
 resource "azurerm_cosmosdb_sql_container" "returns" {
-  name                = "returns"
+  name                = "${var.name_prefix}-confluentwth-returns"
   resource_group_name = azurerm_resource_group.main.name
   account_name        = azurerm_cosmosdb_account.cosmosdb.name
   database_name       = azurerm_cosmosdb_sql_database.retailstore.name
@@ -80,7 +114,7 @@ resource "azurerm_cosmosdb_sql_container" "returns" {
 
 # Replenishments Container
 resource "azurerm_cosmosdb_sql_container" "replenishments" {
-  name                = "replenishments"
+  name                = "${var.name_prefix}-confluentwth-replenishments"
   resource_group_name = azurerm_resource_group.main.name
   account_name        = azurerm_cosmosdb_account.cosmosdb.name
   database_name       = azurerm_cosmosdb_sql_database.retailstore.name
@@ -92,7 +126,7 @@ resource "azurerm_cosmosdb_sql_container" "replenishments" {
 
 # Azure Blob Storage (Storage Account)
 resource "azurerm_storage_account" "storage" {
-  name                     = "cfltizzyretailstore1"
+  name                     = "${var.name_prefix}confluentwthstore"
   resource_group_name      = azurerm_resource_group.main.name
   location                 = azurerm_resource_group.main.location
   account_tier             = "Standard"
@@ -103,9 +137,9 @@ resource "azurerm_storage_account" "storage" {
 # Define a list of blob container names
 locals {
   container_names = [
-    "departments",
-    "product-pricing",
-    "product-skus"
+    "${var.name_prefix}-confluentwth-departments",
+    "${var.name_prefix}-confluentwth-product-pricing",
+    "${var.name_prefix}-confluentwth-product-skus"
   ]
 }
 
