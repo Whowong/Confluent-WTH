@@ -142,6 +142,11 @@ variable "azure_blob_account_key" {
   sensitive   = true
 }
 
+variable "azure_blob_container_name" {
+  description = "Azure Blob Storage Container Name"
+  type        = string
+}
+
 variable "kafka_service_account_id" {
   description = "Kafka Service Account ID for connector authentication"
   type        = string
@@ -249,7 +254,7 @@ resource "confluent_connector" "blob_store_connectors" {
     "kafka.auth.mode"                                = "SERVICE_ACCOUNT"
     "kafka.service.account.id"                       = var.kafka_service_account_id
     "azblob.account.name"                            = var.azure_blob_account_name
-    "azblob.container.name"                          = "andyblob"
+    "azblob.container.name"                          = var.azure_blob_container_name
     "azblob.retry.type"                              = "EXPONENTIAL"
     "input.data.format"                              = "JSON"
     "output.data.format"                             = "JSON"
