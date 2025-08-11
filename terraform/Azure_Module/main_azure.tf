@@ -9,11 +9,6 @@ terraform {
   required_version = ">= 1.11.4"
 }
 
-provider "azurerm" {
-  features {
-  }
-  subscription_id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-}
 
 variable "name_prefix" {
   description = "Prefix for all resource names"
@@ -149,5 +144,55 @@ resource "azurerm_storage_container" "containers" {
   name                  = each.value
   storage_account_id    = azurerm_storage_account.storage.id
   container_access_type = "private"
+}
+
+# -----------------
+# Module Outputs
+# -----------------
+output "resource_group_name" {
+  value       = azurerm_resource_group.main.name
+  description = "Name of the Azure resource group"
+}
+
+output "storage_account_name" {
+  value       = azurerm_storage_account.storage.name
+  description = "Azure Storage Account name"
+}
+
+output "storage_account_primary_key" {
+  value       = azurerm_storage_account.storage.primary_access_key
+  sensitive   = true
+  description = "Primary access key for the storage account"
+}
+
+output "storage_container_names" {
+  value       = [for c in azurerm_storage_container.containers : c.name]
+  description = "List of created storage container names"
+}
+
+output "cosmos_account_name" {
+  value       = azurerm_cosmosdb_account.cosmosdb.name
+  description = "Cosmos DB account name"
+}
+
+output "cosmos_primary_key" {
+  value       = azurerm_cosmosdb_account.cosmosdb.primary_key
+  sensitive   = true
+  description = "Primary key for the Cosmos DB account"
+}
+
+output "cosmos_database_name" {
+  value       = azurerm_cosmosdb_sql_database.retailstore.name
+  description = "Cosmos DB SQL database name"
+}
+
+output "cosmos_account_endpoint" {
+  value       = "https://${azurerm_cosmosdb_account.cosmosdb.name}.documents.azure.com:443/"
+  description = "Endpoint URL for Cosmos DB account"
+}
+
+output "search_service_name" {
+  value       = azurerm_search_service.search.name
+  description = "Azure Cognitive Search service name"
 }
 

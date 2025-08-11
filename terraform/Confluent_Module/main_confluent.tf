@@ -217,7 +217,7 @@ resource "confluent_schema" "key_schemas" {
   for_each            = toset(local.kafka_topic_names)
   subject_name        = "${each.value}-key-terraform"
   format              = "JSON"
-  schema              = file("../../retail_store/${each.value}/schemas/${each.value}-key.json")
+  schema              = file("../retail_store/${each.value}/schemas/${each.value}-key.json")
   hard_delete         = true # Optional: Set to true if you want to hard delete the schema
 }
 
@@ -226,7 +226,7 @@ resource "confluent_schema" "value_schemas" {
   for_each            = toset(local.kafka_topic_names)
   subject_name        = "${each.value}-value-terraform"
   format              = "JSON"
-  schema              = file("../../retail_store/${each.value}/schemas/${each.value}-value.json")
+  schema              = file("../retail_store/${each.value}/schemas/${each.value}-value.json")
   hard_delete         = true # Optional: Set to true if you want to hard delete the schema
 }
 
